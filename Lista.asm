@@ -11,15 +11,18 @@
 	msg1: .asciiz "La lista no tiene ningún elemento."
 	msg2: .asciiz "¿Desea crear un nuevo nodo? Marque 1 para si y 0 para no"
 	msg3: .asciiz "Se ha creado un nuevo nodo"
-	msg_key: .asciiz "Elija el key de su elemento"
+	msg_key: .asciiz "Ingrese el key del elemento"
 	
-	menu1: .asciiz "¿Desea añadir otro nodo? Marque 1 para Si y 0 para No"
-	
-	prueba: .asciiz "La cantidad de elementos en la lista es: "
+	menu: .asciiz "LISTA SIMPLEMENTE ENLAZADA"
+	menu1: .asciiz "1) Crear un nuevo Nodo para la Lista"
+	menu2: .asciiz "2) Imprimir Lista"
+	menu3: .asciiz "3) Salir del programa"
 	
 	collect_answer: .asciiz "Respuesta: "
 
 	salto_de_linea: .asciiz "\n"
+	espacio: .asciiz " "
+	separador: .asciiz "#---------------------------------------#"
 	
 
 .text
