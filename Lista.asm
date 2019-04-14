@@ -50,7 +50,10 @@
 			#Checa el tamaño del size de la lista, si es 0 crea nodo automaticamente
 			lw $a0, Head
 			lw $a0, 8($a0)
-			beqz $a0, Nodo
+			
+			beqz $a0, label
+			
+			label: jal Nodo
 			
 			#Se pregunta si desea añadir algún nodo
 			la $a0, msg2
@@ -168,54 +171,91 @@ Cabeza_Lista:
 # NODO DE LISTA
 Nodo:
 	#Se salvan los registros a utilizar
-	sw $a0, 4($sp)
-	sw $a1, 8($sp)
-	sw $ra, 12($sp)
+	#sw $a0, -4($sp)
+	#sw $a1, -8($sp)
+	sw $ra, -12($sp)
 	#----------
-	
-	#Sumamos 1 al size 
-	lw $a1, Head
-	lw  $a0, 8($a1)
-	addi $a0, $a0, 1
-	sw $a0, 8($a1) 	
-	
-	#Se reserva espacio para:
-	#Elemento, Dirección del Siguiente
-	add $a0, $zero, 8
-	li $v0, 9
-	syscall
+	node_creation:
+		#Se reserva espacio para:
+		#Elemento, Dirección del Siguiente
+		add $a0, $zero, 8
+		li $v0, 9
+		syscall
 		
-	#Guardamos la dirección en $sp y movemos el registro para reubicar la cabeza de $sp
-	sw $v0, ($sp)
-	sub $sp, $sp, 4
+		#Guardamos la dirección en $sp y movemos el registro para reubicar la cabeza de $sp
+		sw $v0, ($sp)
+		sub $sp, $sp, 4
 	
-	#Display del mensaje para pedir key del nodo
-	la $a0, msg_key
-	jal print_string
+		#Display del mensaje para pedir key del nodo
+		la $a0, msg_key
+		jal print_string
+		
+		jal newline
 	
-	jal newline
+		la $a0, collect_answer
+		jal print_string
 	
-	la $a0, collect_answer
-	jal print_string
+		#Se lee la respuesta (Input debe ser entero)
+		li $v0, 5
+		syscall
 	
-	#Se lee la respuesta (Input debe ser entero)
-	li $v0, 5
-	syscall
+		#Se guarda la respuesta en la 1era Palabra de la dirección reservada
+		lw $a1, 4($sp)
+		sw $v0, ($a1)
+		
+	checking_node:
+		#Sumamos 1 al size de Cabeza_Lista
+		lw $a1, Head
+		lw  $a0, 8($a1)
+		addi $a0, $a0, 1
+		sw $a0, 8($a1)
+		
+		#Checa el tamaño del size de la lista, si es mayor que 1 procede a modificar el next del nodo anterior
+		lw $a0, Head
+		lw $a0, 8($a0)
+		addi $a1, $zero, 1
+		bgt $a0, $a1, regular_node
 	
-	#Se guarda la respuesta en la 1era Palabra de la dirección reservada
-	lw $a1, 4($sp)
-	sw $v0, ($a1)
+	first_node:
+		#Accedemos a la dirección donde está almacenada Cabeza_Lista
+		lw $a0, Head
+		
+		#Recuperamos la dirección reservada del nodo
+		la $a1, 4($sp)
+		
+		#Guardamos en la primera dirección de Cabeza_Lista la dirección de memoria reservada del nodo actual
+		sw $a1, ($a0)
+		
+		j last_node
+		
+	regular_node:
+		#Accedo a la dirección donde está almacenado el nodo anterior
+		lw $a0, 8($sp)
+		
+		#Recuperamos la dirección reservada del nodo actual
+		lw $a1, 4($sp)
+		
+		#Guardamos en la 2da Palabra del Nodo anterior (el Next) la dirección de Memoria reservada del nodo actual
+		sw $a1, 4($a0)
 	
-	#AÑADIR CONECTAR CON EL SIGUIENTE NODO
-	
+	last_node:
+		#Accedo a la dirección donde está almacenada Cabeza_Lista
+		lw $a0, Head
+		
+		#Recuperamos la dirección reservada del nodo actual
+		la $a1, 4($sp)
+		
+		#Guardamos en la 2da Palabra de Cabeza_Lista la dirección actual, para convertirla en ultimo nodo
+		sw $a1, 4($a0)
+
 	#----------
-	#Se recuperan las variables
-	addi $sp, $sp, 4
-	lw $a0, 4($sp)
-	lw $a1, 8($sp)
-	lw $ra, 12($sp)
-	
-	jr  $ra
+	return_Nodo:
+		#Se recuperan las variables tomando en cuenta la modificación al $sp
+		#lw $a0, ($sp)
+		#lw $a1, -4($sp)
+		lw $ra, -8($sp)
+		
+		jr  $ra # NO ESTÁ AGARRANDO BIEN EL $ra PARA 2DO NODO (se devuelve a la 79, que es el último $ra)
 
 ##############
 	#### UTIL PARA IMPRIMIR NODOS
