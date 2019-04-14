@@ -77,8 +77,47 @@
 			
 			
 		main_menu:
+			#Imprime el header entre separadores
+			la $a0, separador
+			jal print_string
+			jal newline
 			
+			la $a0, menu
+			jal print_string
+			jal newline
 			
+			la $a0, separador
+			jal print_string
+			jal newline
+			
+			#Imprimimos las opciones a realizar del menu		
+			la $a0, menu1
+			jal print_string
+			jal newline
+			
+			la $a0, menu2
+			jal print_string
+			jal newline
+			
+			la $a0, menu3
+			jal print_string
+			jal newline
+			
+			#Recolectamos la respuesta del usuario
+			la $a0, collect_answer
+			jal print_string			
+			li $v0, 5
+			syscall
+			
+			#Añadimos en variables los posibles valores de respuesta
+			addi $a0, $zero, 1
+			addi $a1, $zero, 2
+			addi $a2, $zero, 3
+			
+			#Se compara la respuesta obtenida mediante Branchs
+			beq $v0, $a0, main_loop
+			beq $v0, $a1, Salida
+			beq $v0, $a2, Salida 
 			
 			
 		
@@ -87,8 +126,9 @@
 	li $v0, 10
 	syscall
 	
-
+##------------------------------
 ## FUNCIONES
+##------------------------------
 	
 # Imprimir String
 print_string:
