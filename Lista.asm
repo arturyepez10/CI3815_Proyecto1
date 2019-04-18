@@ -250,12 +250,36 @@ Nodo:
 
 	#----------
 	return_Nodo:
-		#Se recuperan las variables tomando en cuenta la modificación al $sp
+		#Se recuperan los registros tomando en cuenta la modificación al $sp
 		#lw $a0, ($sp)
 		#lw $a1, -4($sp)
 		lw $ra, -8($sp)
 		
 		jr  $ra # NO ESTÁ AGARRANDO BIEN EL $ra PARA 2DO NODO (se devuelve a la 79, que es el último $ra)
+		
+print_Nodo:
+	#Se salvan los registros a utilizar
+	#sw $a0, -4($sp) #Se utiliza $a0 para pasar como parametro la dirección donde está el nodo
+	sw $a1, -4($sp)
+	sw $ra, -8($sp)
+	#----------
+	
+	#Carga el contenido interpretando esa palabra como dirección donde se encuentra ubicado el key
+	lw $a0, ($a0)
+	#Ejecuta la lectura del contenido  de la dirección en $a0
+	li $v0, 1
+	syscall
+	
+	#----------
+	#Se recuperan los registros
+	#lw $a0, -4($sp)
+	lw $a1, -4($sp)
+	lw $ra, -8($sp)
+	
+	jr $ra
+	
+print_tree: 
+	
 
 ##############
 	#### UTIL PARA IMPRIMIR NODOS
@@ -263,21 +287,21 @@ Nodo:
 		lw $a0, 4($sp)
 		#Carga el contenido interpretando esa palabra como la dirección donde se encuentra el contenido del key
 		lw $a0, ($a0)
-		#Ejecuta la lectura del contenido de la dirección en $ao
+		#Ejecuta la lectura del contenido de la dirección en $a0
 		li $v0, 1
 		syscall
 		
 	### UTIL PARA IMPRIMIR EL CONTADOR DE ELEMENTOS EN LA LISTA (A partir de la línea 137)
-			#nueva linea
-			jal newline
-			#carga a $a1 dirección donde está guardada Cabeza_Lista
-			lw $a1, Head
-			#dada el contenido de $a1 lo interpreta como dirección+8 y carga ese contenido en $a2 (ese contenido es el contador)
-			lw  $a2, 8($a1)
-			#carga en $a0 el mensaje de prueba y lo imprime
-			la $a0, prueba
-			jal print_string
-			#carga en $a0 el contenido de la dirección de $a2 y lo imprime
-			la $a0, ($a2)
-			jal print_integer
-			jal newline
+		#nueva linea
+		jal newline
+		#carga a $a1 dirección donde está guardada Cabeza_Lista
+		lw $a1, Head
+		#dada el contenido de $a1 lo interpreta como dirección+8 y carga ese contenido en $a2 (ese contenido es el contador)
+		lw  $a2, 8($a1)
+		#carga en $a0 el mensaje de prueba y lo imprime
+		#la $a0, prueba
+		jal print_string
+		#carga en $a0 el contenido de la dirección de $a2 y lo imprime
+		la $a0, ($a2)
+		jal print_integer
+		jal newline
