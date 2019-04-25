@@ -15,8 +15,9 @@
 	
 	menu: .asciiz "LISTA SIMPLEMENTE ENLAZADA"
 	menu1: .asciiz "1) Crear un nuevo Nodo para la Lista"
-	menu2: .asciiz "2) Imprimir Lista"
-	menu3: .asciiz "3) Salir del programa"
+	menu2: .asciiz "2) Elimina un nodo existente de la Lista"
+	menu3: .asciiz "3) Imprimir Lista"
+	menu4: .asciiz "4) Salir del programa"
 	
 	collect_answer: .asciiz "Respuesta: "
 
