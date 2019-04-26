@@ -54,17 +54,34 @@
 		la $t5, counter
 		li $t6,-1
 
-		while:
-			beq $t5,$a0,exit #Condición de salida
+		# Ciclo para reservar la memoria
+		while1:
+			beq $t5,$a0,while_exit1 #Condición de salida
 			addi $t5,$t5,1 #Sumamos el contador
 			
 			sw $t6,myarray($t0)
 			addi $t0,$t0,1
+			
+			j while1
 
-			j while
+		while_exit1: 
+			# Devolvemos el apuntador al inicio de nuestro arreglo
+			sub $t0,$t0,$t5
+		
+		# Ciclo para definir el espacio de referencia
+		while2:
+			beq $t5,$a0,while_exit1 #Condición de salida
+			addi $t5,$t5,1 #Sumamos el contador
+			
+			sw $t6,myarray($t0)
+			addi $t0,$t0,1
+			
+			j while1
 
-		exit: 
-			jr $ra
+		while_exit2: 
+			# Devolvemos el apuntador al inicio de nuestro arreglo
+			sub $t0,$t0,$t5
+
 
 	malloc:
 
