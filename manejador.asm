@@ -3,7 +3,6 @@
 	# Variables base
 	InitMax: .word 200
 	size: .word # Cantidad de memoria que solicita el usuario
-	Ref_List: .word 0:200
 	counter: .word 0
 
 	# Auxiliares
@@ -13,11 +12,12 @@
 	
 	# Mensajes de error
 	msginit1: .asciiz "[ERROR] La cantidad de memoria a reservar no puede ser menor a 1"
-	msginit2: .asciiz "[ERROR] La cantidad de memoria a reservar es superior al maximo permitido de 500"
+	msginit2: .asciiz "[ERROR] La cantidad de memoria a reservar es superior al maximo permitido de 1000"
 	msgmalloc1: .asciiz "[ERROR] No se pudo realizar la reserva de memoria"
 	
 	# Definimos el arreglo donde se manejar� la maemoria
-	memory: .space 4 #Establecemos un word como espacio incial de 4 bytes que luego varíará
+	Ref_List: .byte 0:1000
+	memory: .byte 1 #Establecemos un word como espacio incial de 4 bytes que luego varíará
 .text
 	main:
 		# Creamos el indice de $t0 
@@ -52,13 +52,14 @@
 	
 		# Se hace un ciclo donde se rellena con 0 todo el espacio reservado
 		la $t5, counter
-		
+		li $t6,-1
+
 		while:
 			beq $t5,$a0,exit #Condición de salida
 			addi $t5,$t5,1 #Sumamos el contador
 			
-			li 
-			sw 
+			sw $t6,myarray($t0)
+			addi $t0,$t0,4
 
 			j while
 
