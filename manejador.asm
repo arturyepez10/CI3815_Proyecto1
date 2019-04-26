@@ -59,7 +59,7 @@
 			beq $t5,$a0,while_exit1 #Condición de salida
 			addi $t5,$t5,1 #Sumamos el contador
 			
-			sw $t6,myarray($t0)
+			sw $t6,memory($t0)
 			addi $t0,$t0,1
 			
 			j while1
@@ -68,19 +68,21 @@
 			# Devolvemos el apuntador al inicio de nuestro arreglo
 			sub $t0,$t0,$t5
 		
+		li $t5,counter #Reinicio del contador
+
 		# Ciclo para definir el espacio de referencia
 		while2:
-			beq $t5,$a0,while_exit1 #Condición de salida
+			beq $t5,$a0,while_exit2 #Condición de salida
 			addi $t5,$t5,1 #Sumamos el contador
 			
-			sw $t6,myarray($t0)
-			addi $t0,$t0,1
+			sw $t6,Ref_List($t1)
+			addi $t1,$t1,1
 			
 			j while1
 
 		while_exit2: 
 			# Devolvemos el apuntador al inicio de nuestro arreglo
-			sub $t0,$t0,$t5
+			sub $t1,$t1,$t5
 
 
 	malloc:
