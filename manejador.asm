@@ -34,31 +34,48 @@ main:
 ### Funciones
 #--------------
 init:
-
 	#Verifincamos que la cantidad de bytes sea mayor igual que 1
 	slt  $t1,$t2,1
-	beq $t1,0, SendToPerror_init
+	beq $t1,0, SendToPerror_init1
+
+	# Verificamos que no sobrepase la cota superior
+	lw $t3,InitMax
+	sgt $t1,$t2,$t3
+	beq $t1,1, SendToPerror_init2
 	
 	# Guardamos el espacio de memoria nuevo
 	li $v0,9
 	syscall	
+
+	# Se hace un ciclo donde se rellena con 0 todo el espacio reservado
+	while:
+		
 	
 	exit: jr $ra
 	
-	SendToPerror_init:
+	SendToPerror_init1:
 		# Cargamos el codigo de error en $a1 y lo pasamos a perror
 		li $a1,1
+		jal perror
+		jr $ra
+	
+	SendToPerror_init2:
+		# Cargamos el codigo de error en $a1 y lo pasamos a perror
+		li $a1,2
 		jal perror
 		jr $ra
 	
 		
 malloc:
 
+
 free:
 
 perror:
 	# Hacemos la verificación de errores por cada uno
-	beq $a0, 1, Error_Init1
+	beq $a0, 1, error_Init1
+	beq $a0, 2, error_Init2
+
 #-----------------------
 ### Funciones auxiliares
 #-----------------------
@@ -82,6 +99,7 @@ newline:
 	syscall
 	jr $ra
 	
+
 #-----------------------
 ### Funciones de error
 #-----------------------
@@ -90,3 +108,7 @@ error_init1:
 	jal print_string
 	jr $ra
 	
+error_init2:
+	la $a0, msginit2
+	jal print_string
+	jr $ra
