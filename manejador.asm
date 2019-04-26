@@ -1,14 +1,20 @@
 ### TAD_Manejador: Manejador de memoria 
 .data	
+	# Variables base
+	InitMax: .word 500
+	size: .word # Cantidad de memoria que solicita el usuario
+	
 	# Auxiliares
 	salto_de_linea: .asciiz "\n"
 	msg1: .asciiz "La prueba corre"
-	Error_init: .word	
-	# Mensajes de error
+		
 	
+	# Mensajes de error
+	msginit1: .asciiz "[ERROR] La cantidad de memoria a reservar no puede ser menor a 1"
+	msginit2: .asciiz "[ERROR] La cantidad de memoria a reservar es superior al maximo permitido de 500"
+	msgmalloc .asciiz "[ERROR] No se pudo realizar la reserva de memoria"
 	
 	# Definimos el arreglo donde se manejar� la maemoria
-	size: .word # Cantidad de memoria que solicita el usario
 	memory: .space 4 #Establecemos un word como espacio incial de 4 bytes que luego varíará
 .text
 main:
@@ -33,13 +39,9 @@ init:
 	slt  $t1,$t2,1
 	beq $t1,0, SendToPerror_init
 	
-	while:
-		# Cargamos en t7 el valor de size y hacemos la verificación.
-		# Cuando el indice sea igual al tamaño del arreglo
-		la $t7,size
-		beq $t0, $a0, exit
-		
-		
+	# Guardamos el espacio de memoria nuevo
+	li $v0,9
+	syscall	
 	
 	exit: jr $ra
 	
@@ -56,7 +58,7 @@ free:
 
 perror:
 	# Hacemos la verificación de errores por cada uno
-	
+	beq $a0, 1, Error_Init1
 #-----------------------
 ### Funciones auxiliares
 #-----------------------
@@ -84,4 +86,7 @@ newline:
 ### Funciones de error
 #-----------------------
 error_init1:
-
+	la $a0, msginit1
+	jal print_istring
+	jr $ra
+	
