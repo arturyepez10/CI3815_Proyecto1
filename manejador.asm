@@ -59,7 +59,7 @@
 			addi $t5,$t5,1 #Sumamos el contador
 			
 			sw $t6,myarray($t0)
-			addi $t0,$t0,4
+			addi $t0,$t0,1
 
 			j while
 
