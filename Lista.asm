@@ -19,6 +19,9 @@
 	menu3: .asciiz "3) Imprimir Lista"
 	menu4: .asciiz "4) Salir del programa"
 	
+	msgList: .asciiz "Los elementos de la lista son: "
+	printedList: .asciiz "[Presione enter para continuar]"
+	
 	collect_answer: .asciiz "Respuesta: "
 
 	salto_de_linea: .asciiz "\n"
@@ -73,12 +76,8 @@
 			
 			jal newline
 			
-			#Si el valor es 1 procede a crear el nodo
+			#Si el valor es mayor procede a crear el nodo
 			jal Nodo
-			
-			#Se repite el loop para ver si se añade otro nodo
-			jal main_loop
-			
 			
 		main_menu:
 			#Imprime el header entre separadores
@@ -107,6 +106,10 @@
 			jal print_string
 			jal newline
 			
+			la $a0, menu4
+			jal print_string
+			jal newline
+			
 			#Recolectamos la respuesta del usuario
 			la $a0, collect_answer
 			jal print_string			
@@ -117,13 +120,13 @@
 			addi $a0, $zero, 1
 			addi $a1, $zero, 2
 			addi $a2, $zero, 3
+			addi $a3, $zero, 4
 			
-			#Se compara la respuesta obtenida mediante Branchs
+			#Se compara la respuesta obtenida mediante Branchs y dependiendo manda a esa función
 			beq $v0, $a0, main_loop
 			beq $v0, $a1, Salida
-			beq $v0, $a2, Salida 
-			
-			
+			beq $v0, $a2, print_list
+			beq $v0, $a3, Salida
 		
 
 	Salida:
@@ -156,7 +159,7 @@ newline:
 # 1er NODO DE LISTA
 Cabeza_Lista:
 	#Se reserva el espacio para:
-	#Dirección Primer Nodo, Direción Ultimo Nodo, Tamaño de la lista
+	#Dirección Primer Nodo, Dirección Ultimo Nodo, Cantidad de Nodos en la lista
 	addi $a0, $zero, 12
 	li $v0, 9
 	syscall
@@ -172,13 +175,12 @@ Cabeza_Lista:
 # NODO DE LISTA
 Nodo:
 	#Se salvan los registros a utilizar
-	#sw $a0, -4($sp)
-	#sw $a1, -8($sp)
 	sw $ra, -12($sp)
 	#----------
+	
 	node_creation:
 		#Se reserva espacio para:
-		#Elemento, Dirección del Siguiente
+		#Elemento, Dirección del Siguiente Nodo
 		add $a0, $zero, 8
 		li $v0, 9
 		syscall
@@ -201,7 +203,7 @@ Nodo:
 		syscall
 	
 		#Se guarda la respuesta en la 1era Palabra de la dirección reservada
-		lw $a1, 4($sp)
+		lw $a1, 4($sp)	#Dirección del Nodo
 		sw $v0, ($a1)
 		
 	checking_node:
@@ -252,57 +254,138 @@ Nodo:
 	#----------
 	return_Nodo:
 		#Se recuperan los registros tomando en cuenta la modificación al $sp
-		#lw $a0, ($sp)
-		#lw $a1, -4($sp)
 		lw $ra, -8($sp)
 		
-		jr  $ra # NO ESTÁ AGARRANDO BIEN EL $ra PARA 2DO NODO (se devuelve a la 79, que es el último $ra)
-		
-print_Nodo:
+		jr  $ra
+	
+# IMPRIMIR NODO DE LA LISTA	
+print_Nodo:  #Se utiliza $a0, $a1, $t1 para pasar como parametro la dirección donde está el nodo
 	#Se salvan los registros a utilizar
-	#sw $a0, -4($sp) #Se utiliza $a0 para pasar como parametro la dirección donde está el nodo
-	sw $a1, -4($sp)
 	sw $ra, -8($sp)
 	#----------
 	
-	#Carga el contenido interpretando esa palabra como dirección donde se encuentra ubicado el key
-	lw $a0, ($a0)
-	#Ejecuta la lectura del contenido  de la dirección en $a0
-	li $v0, 1
-	syscall
+	#Se asigna a $a2 el número 2 para usar para una comparación
+	addi $a2, $zero, 2
+	
+	#Si el número del nodo actual es mayor o igual a 2 salta a regular_nodes
+	bge $t1, $a2, regular_nodes
+	
+	# Se divide la sección en 2 branches por como deben ser interpretado los datos, en ambos casos como se interpretan
+	# y cargos .los datos y los valores en sus respectivas posiciones del arreglo donde están ubicados.
+	first_node_to_print:
+		#Cargar en $a0 el primer campo de Head
+		lw $a0, ($a1)
+		#Carga en $a0 la dirección de $sp del nodo actual
+		lw $a0, ($a0)
+		#Carga el key del nodo en $a0
+		lw $a0, ($a0)
+		
+		j end_print
+		
+	regular_nodes:
+		#Carga en $a0 la dirección del $sp del nodo actual
+		lw $a0, ($a1)
+		#Carga el key del nodo en $a0
+		lw $a0, ($a0)
+		
+	end_print:
+		#Hace print del key del nodo, actualmente alojado en $a0
+		li $v0, 1
+		syscall
 	
 	#----------
 	#Se recuperan los registros
-	#lw $a0, -4($sp)
-	lw $a1, -4($sp)
 	lw $ra, -8($sp)
 	
 	jr $ra
-	
-print_tree: 
-	
 
-##############
-	#### UTIL PARA IMPRIMIR NODOS
-		#Carga la palabra guardada en el stack (la palabra guardada es la dirección donde está el contenido de la key)
-		lw $a0, 4($sp)
-		#Carga el contenido interpretando esa palabra como la dirección donde se encuentra el contenido del key
-		lw $a0, ($a0)
-		#Ejecuta la lectura del contenido de la dirección en $a0
-		li $v0, 1
-		syscall
+# IMPRIMIR TODOS LOS NODOS DE LA LISTA
+print_list:
+	#Se salvan los registros a utilizar
+	sw $ra, -4($sp)
+	#----------
+	
+	#Se accede al Head para buscar el valor de la dirección donde está alojado el primer nodo
+	lw $a1, Head
+	
+	#Se guarda en $t0 la cantidad de nodos que posee la lista al momento
+	lw $t0, 8($a1)
+	
+	#Se toma $t1 como contador de nodos impresos, comenzando en 0
+	addi $t1, $zero, 0
+	
+	#Se imprime una línea en blanco
+	jal newline
+	
+	#Imprimmos el mensaje para indicar que viene la lista, salvando el valor de $a0 para su uso posterior
+	sw $a0, -8($sp)
+	#---#
+	la $a0, msgList
+	jal print_string
+	jal newline
+	#---#
+	lw $a0, -8($sp)
+	
+	#Loop para la impresión de nodos	
+	loop_list:
+		#Compara el valor del contador de elementos impresos con el de elementos totales para ver si sigue el loop
+		beq $t0, $t1, return_PrintList
 		
-	### UTIL PARA IMPRIMIR EL CONTADOR DE ELEMENTOS EN LA LISTA (A partir de la línea 137)
-		#nueva linea
-		jal newline
-		#carga a $a1 dirección donde está guardada Cabeza_Lista
-		lw $a1, Head
-		#dada el contenido de $a1 lo interpreta como dirección+8 y carga ese contenido en $a2 (ese contenido es el contador)
-		lw  $a2, 8($a1)
-		#carga en $a0 el mensaje de prueba y lo imprime
-		#la $a0, prueba
+		#Se suma 1 al contador de nodos impresos
+		addi $t1, $t1, 1
+		
+		#Se imprime el nodo actual
+		jal print_Nodo
+		
+		#Imprimimos un espacio, salvando el valor de $a0 para su uso posterior 
+		sw $a0, -8($sp)
+		#---#
+		la $a0, espacio
 		jal print_string
-		#carga en $a0 el contenido de la dirección de $a2 y lo imprime
-		la $a0, ($a2)
-		jal print_integer
-		jal newline
+		#---#
+		lw $a0, -8($sp)
+		
+		# Checamos en que nodo nos encontramos y así poder interpretarlo de la forma correcta
+		#Asignamos en $a2 el número 1 para una comparación
+		addi $a2, $zero, 2
+		
+		#Si la posición del nodo es mayor o igual que la 2
+		bge $t1, $a2, content_regular_node
+		
+		content_first_node:
+			#Ponemos en $a1 la dirección donde está ubicado el 2do Nodo
+			lw $a1, ($a1)
+			#Nos ubicamos en el key del nodo
+			lw $a1, ($a1)
+			#Vamos a la casilla Dirección del Siguiente del Nodo
+			addi $a1, $a1, 4
+			
+			j loop_list
+			
+		content_regular_node:
+			#Nos ubicamos en el key del nodo
+			lw $a1, ($a1)
+			#Vamos a la casilla Dirección del Siguiente del Nodo
+			addi $a1, $a1, 4
+		
+			j loop_list
+	
+	return_PrintList:
+	jal newline
+	
+	#Imprimimos un mensaje y pedimos entrada de usuario para forzar que el usuario pueda ver la lista impresa
+	jal newline
+	
+	la $a0, printedList
+	jal print_string
+	
+	li $v0, 8
+	syscall
+	
+	jal newline
+	
+	#----------
+	#Se recuperan los registros
+	lw $ra, -4($sp)
+	
+	j main_menu
