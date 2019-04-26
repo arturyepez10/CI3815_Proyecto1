@@ -3,6 +3,7 @@
 	# Variables base
 	InitMax: .word 500
 	size: .word # Cantidad de memoria que solicita el usuario
+	Free_List: 0:500
 	
 	# Auxiliares
 	salto_de_linea: .asciiz "\n"
@@ -35,19 +36,20 @@ main:
 #--------------
 init:
 	#Verifincamos que la cantidad de bytes sea mayor igual que 1
-	slt  $t1,$t2,1
+	slt  $t1,$a0,1
 	beq $t1,0, SendToPerror_init1
 
 	# Verificamos que no sobrepase la cota superior
 	lw $t3,InitMax
-	sgt $t1,$t2,$t3
+	sgt $t1,$a0,$t3
 	beq $t1,1, SendToPerror_init2
 	
 	# Guardamos el espacio de memoria nuevo
 	li $v0,9
 	syscall	
-
+ 
 	# Se hace un ciclo donde se rellena con 0 todo el espacio reservado
+	
 	while:
 		beq $t4,
 
@@ -65,8 +67,8 @@ free:
 
 perror:
 	# Hacemos la verificación de errores por cada uno
-	beq $a0, 1, error_Init1
-	beq $a0, 2, error_Init2
+	beq $a0, -1, error_Init1
+	beq $a0, -2, error_Init2
 
 #-----------------------
 ### Funciones auxiliares
@@ -97,13 +99,13 @@ newline:
 
 SendToPerror_init1:
 	# Cargamos el codigo de error en $a1 y lo pasamos a perror
-	li $a1,1
+	li $a1,-1
 	jal perror
 	jr $ra
 
 SendToPerror_init2:
 	# Cargamos el codigo de error en $a1 y lo pasamos a perror
-	li $a1,2
+	li $a1,-2
 	jal perror
 	jr $ra
 
