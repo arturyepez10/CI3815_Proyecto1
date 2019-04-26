@@ -12,7 +12,7 @@
 	# Mensajes de error
 	msginit1: .asciiz "[ERROR] La cantidad de memoria a reservar no puede ser menor a 1"
 	msginit2: .asciiz "[ERROR] La cantidad de memoria a reservar es superior al maximo permitido de 500"
-	msgmalloc .asciiz "[ERROR] No se pudo realizar la reserva de memoria"
+	msgmalloc1: .asciiz "[ERROR] No se pudo realizar la reserva de memoria"
 	
 	# Definimos el arreglo donde se manejar� la maemoria
 	memory: .space 4 #Establecemos un word como espacio incial de 4 bytes que luego varíará
@@ -87,6 +87,6 @@ newline:
 #-----------------------
 error_init1:
 	la $a0, msginit1
-	jal print_istring
+	jal print_string
 	jr $ra
 	
