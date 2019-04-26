@@ -49,27 +49,19 @@ init:
 
 	# Se hace un ciclo donde se rellena con 0 todo el espacio reservado
 	while:
-		
+		beq $t4,
+
+
+		j while
 	
-	exit: jr $ra
-	
-	SendToPerror_init1:
-		# Cargamos el codigo de error en $a1 y lo pasamos a perror
-		li $a1,1
-		jal perror
+	exit: 
 		jr $ra
-	
-	SendToPerror_init2:
-		# Cargamos el codigo de error en $a1 y lo pasamos a perror
-		li $a1,2
-		jal perror
-		jr $ra
-	
-		
+			
 malloc:
 
 
 free:
+
 
 perror:
 	# Hacemos la verificación de errores por cada uno
@@ -98,7 +90,23 @@ newline:
 	la $a0, salto_de_linea
 	syscall
 	jr $ra
-	
+
+#-----------------------
+### Subfunciones del Init
+#-----------------------	
+
+SendToPerror_init1:
+	# Cargamos el codigo de error en $a1 y lo pasamos a perror
+	li $a1,1
+	jal perror
+	jr $ra
+
+SendToPerror_init2:
+	# Cargamos el codigo de error en $a1 y lo pasamos a perror
+	li $a1,2
+	jal perror
+	jr $ra
+
 
 #-----------------------
 ### Funciones de error
