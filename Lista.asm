@@ -13,14 +13,17 @@
 	msg3: .asciiz "Se ha creado un nuevo nodo"
 	msg_key: .asciiz "Ingrese el key del elemento"
 	
+	msgList: .asciiz "Los elementos de la lista son: "
+	printedList: .asciiz "[Presione enter para continuar]"
+	
+	delete1: .asciiz "¿Cuál nodo desea eliminar? (Establecer como respuesta la posición del nodo en la lista)"
+	delete2: .asciiz "No existe el elemento que desea eliminar. Introduzca una posición valida"
+	
 	menu: .asciiz "LISTA SIMPLEMENTE ENLAZADA"
 	menu1: .asciiz "1) Crear un nuevo Nodo para la Lista"
 	menu2: .asciiz "2) Elimina un nodo existente de la Lista"
 	menu3: .asciiz "3) Imprimir Lista"
 	menu4: .asciiz "4) Salir del programa"
-	
-	msgList: .asciiz "Los elementos de la lista son: "
-	printedList: .asciiz "[Presione enter para continuar]"
 	
 	collect_answer: .asciiz "Respuesta: "
 
