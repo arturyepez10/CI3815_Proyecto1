@@ -11,9 +11,10 @@
 		
 	
 	# Mensajes de error
-	msginit1: .asciiz "[ERROR] La cantidad de memoria a reservar no puede ser menor a 1"
-	msginit2: .asciiz "[ERROR] La cantidad de memoria a reservar es superior al maximo permitido de 1000"
-	msgmalloc1: .asciiz "[ERROR] No se pudo realizar la reserva de memoria"
+	msginit1: .asciiz "[ERROR: Init01] La cantidad de memoria a reservar no puede ser menor a 1"
+	msginit2: .asciiz "[ERROR: Init02] La cantidad de memoria a reservar es superior al maximo permitido de 1000"
+	msgmalloc1: .asciiz "[ERROR: Malloc01] No se pudo realizar la reserva de memoria"
+	msgfree1: .asciiz "[ERROR: Free01] El espacio de memoria solicitado ya está vacío"
 	
 	# Definimos el arreglo donde se manejar� la maemoria
 	Ref_List: .byte 0:1000
@@ -100,6 +101,7 @@
 		beq $a0, -1, error_Init1
 		beq $a0, -2, error_Init2
 
+		jr $ra
 	#-----------------------
 	### Funciones auxiliares
 	#-----------------------
@@ -148,7 +150,8 @@
 			beq $t5,$a0,while_exit3 #Condición de salida
 			addi $t5,$t5,1 #Sumamos el contador
 
-			la	$t2, ref_list(
+			lw	$t2, ref_list($t1)
+			beq $t2,$
 			
 
 	#-----------------------
@@ -157,9 +160,9 @@
 	error_init1:
 		la $a0, msginit1
 		jal print_string
-		jr $ra
+		j newline
 
 	error_init2:
 		la $a0, msginit2
 		jal print_string
-		jr $ra
+		j newline
