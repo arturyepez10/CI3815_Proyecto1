@@ -84,10 +84,14 @@
 			# Devolvemos el apuntador al inicio de nuestro arreglo
 			sub $t1,$t1,$t5
 
+	jr $ra
 
 	malloc:
+		# Verificamos usando la ref_list que hay espacio suficiente
+		jal malloc_linear_search
 
 
+	jr $ra
 	free:
 
 
@@ -134,7 +138,18 @@
 		li $a1,-2
 		jal perror
 		jr $ra
+	#-----------------------
+	### Subfunciones del malloc
+	#-----------------------
+	malloc_linear_search:
+		la $t5, counter
 
+		while3:
+			beq $t5,$a0,while_exit3 #Condición de salida
+			addi $t5,$t5,1 #Sumamos el contador
+
+			la	$t2, ref_list(
+			
 
 	#-----------------------
 	### Funciones de error
