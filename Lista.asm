@@ -127,7 +127,7 @@
 			
 			#Se compara la respuesta obtenida mediante Branchs y dependiendo manda a esa función
 			beq $v0, $a0, main_loop
-			beq $v0, $a1, Salida
+			beq $v0, $a1, delete_node
 			beq $v0, $a2, print_list
 			beq $v0, $a3, Salida
 		
@@ -175,7 +175,7 @@ Cabeza_Lista:
 	
 	jr $ra
 	
-# NODO DE LISTA
+# CREAR NODO DE LISTA
 Nodo:
 	#Se salvan los registros a utilizar
 	sw $ra, -12($sp)
@@ -227,7 +227,7 @@ Nodo:
 		lw $a0, Head
 		
 		#Recuperamos la dirección reservada del nodo
-		la $a1, 4($sp)
+		lw $a1, 4($sp) ### la
 		
 		#Guardamos en la primera dirección de Cabeza_Lista la dirección de memoria reservada del nodo actual
 		sw $a1, ($a0)
@@ -249,7 +249,7 @@ Nodo:
 		lw $a0, Head
 		
 		#Recuperamos la dirección reservada del nodo actual
-		la $a1, 4($sp)
+		lw $a1, 4($sp) ### la
 		
 		#Guardamos en la 2da Palabra de Cabeza_Lista la dirección actual, para convertirla en ultimo nodo
 		sw $a1, 4($a0)
@@ -279,7 +279,7 @@ print_Nodo:  #Se utiliza $a0, $a1, $t1 para pasar como parametro la dirección d
 		#Cargar en $a0 el primer campo de Head
 		lw $a0, ($a1)
 		#Carga en $a0 la dirección de $sp del nodo actual
-		lw $a0, ($a0)
+		#lw $a0, ($a0)
 		#Carga el key del nodo en $a0
 		lw $a0, ($a0)
 		
@@ -359,7 +359,7 @@ print_list:
 			#Ponemos en $a1 la dirección donde está ubicado el 2do Nodo
 			lw $a1, ($a1)
 			#Nos ubicamos en el key del nodo
-			lw $a1, ($a1)
+			#lw $a1, ($a1)
 			#Vamos a la casilla Dirección del Siguiente del Nodo
 			addi $a1, $a1, 4
 			
@@ -392,3 +392,91 @@ print_list:
 	lw $ra, -4($sp)
 	
 	j main_menu
+	
+# ELIMINAR UN NOOO DE LA LISTA
+delete_node: #Se utiliza $a0 para pasar como parametro la posición del nodo a eliminar
+	#Se salvan los registros a utilizar
+	sw $ra, -4($sp)
+	#----------
+	
+	jal newline
+	#Imprimir el mensaje inicial al seleccionar la opción
+	la $a0, delete1
+	jal print_string
+	
+	#Se recoge respuesta del usuario
+	jal newline
+	la $a0, collect_answer
+	jal print_string
+	
+	li $v0, 5
+	syscall
+	
+	#Se pasa la respuesta a $t1
+	move $t0, $v0
+	
+	
+	#Restamos 1 al size de Cabeza_Lista
+	lw $a1, Head
+	lw  $a0, 8($a1)
+	subi $a0, $a0, 1
+	sw $a0, 8($a1)
+	
+	#Se crea variable con el valor de 1 para ver a que caso pertenece
+	addi $t1, $zero, 1
+	
+	#Branch para verificar si el nodo es primero o último
+	
+	beq $t0, $t1, delete_first_node
+	
+	#Se accede al Head para buscar el valor de la cantidad total de nodos en la lista
+	lw $a1, Head
+	lw $t2, 8($a1)
+	
+	beq $t0, $t1, delete_last_node
+	
+	delete_regular_node:
+	
+		j return_delete_node
+		
+	delete_first_node:
+		
+		#Cargo en $a0 la posición
+		#Se accede al Head para buscar el valor de la dirección donde está alojado el primer nodo
+		lw $a0, Head
+		
+		#Cargar en $a1 el primer campo de Head
+		lw $a1, ($a0)
+		#Carga en $a1 la dirección de $sp del 2do nodo
+		lw $a1, 4($a1)
+		
+		#Carga en la primera dirección del Head la dirección del 2do nodo
+		sw $a1, ($a0)
+		
+		j return_delete_node
+		
+	delete_last_node:
+		#Cargo en $a0 la posición
+		#Se accede al Head para buscar el valor de la dirección donde está alojado el último nodo
+		lw $a0, Head
+		
+		#Cargar en $a1 el primer campo de Head
+		lw $a1, 4($a0)
+		#Carga en $a1 la dirección de $sp del penultimo nodo
+		lw $a1, -4($a1)
+		
+		#Carga en la 2da dirección del Head la dirección del penultimo nodo
+		sw $a1, 4($a0)
+		
+		j return_delete_node
+	
+	
+	return_delete_node:
+
+	#----------
+	#Se recuperan los registros
+	lw $ra, -4($sp)
+	
+	j main_menu
+	
+	
