@@ -21,7 +21,7 @@
 	memory: .byte 1 #Establecemos un word como espacio incial de 4 bytes que luego varíará
 
 .text
-	main:
+	main_manejador:
 		# Creamos el indice de $t0 y un valor de referencia de apuntador para el arreglo de memoria
 		la $t0, memory
 		sw $t0 memorystart
