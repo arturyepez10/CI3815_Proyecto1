@@ -7,8 +7,6 @@
 
 	# Auxiliares
 	salto_de_linea: .asciiz "\n"
-	msg1: .asciiz "La prueba corre"
-		
 	
 	# Mensajes de error
 	msginit1: .asciiz "[ERROR: Init01] La cantidad de memoria a reservar no puede ser menor a 1"
@@ -104,13 +102,11 @@
 			j while5
 
 			while_exit5:
-				
-
-		# Cargamos en $s2 la dirección de retorno de la función malloc sumando
-		# el contador del while inicial con la dirección inicial del arreglo
-		addi $s2,$t0,$t3 
+				# Cargamos en $s2 la dirección de retorno de la función malloc sumando
+				# el contador del while inicial con la dirección inicial del arreglo
+				addi $s2,$t0,$t3 
 		
-		# Aquí falta el retorno####
+		#### Aquí falta el retorno ####
 
 	jr $ra
 	
