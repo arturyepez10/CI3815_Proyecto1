@@ -111,7 +111,7 @@
 				# el contador del while inicial con la dirección inicial del arreglo
 				addi $s2,$t0,$t3 
 		
-		#### Aquí falta el retorno ####
+		la $v0,$s2
 
 	jr $ra
 	
