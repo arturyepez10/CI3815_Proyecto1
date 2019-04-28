@@ -3,7 +3,9 @@
 	# Variables base
 	InitMax: .word 200
 	size: .word # Cantidad de memoria que solicita el usuario
-	counter: .word 0
+	blocksize: .word 
+	memorystart: .word
+	refstart: .word
 
 	# Auxiliares
 	salto_de_linea: .asciiz "\n"
@@ -17,11 +19,14 @@
 	# Definimos el arreglo donde se manejar� la maemoria
 	Ref_List: .byte 0:1000
 	memory: .byte 1 #Establecemos un word como espacio incial de 4 bytes que luego varíará
+
 .text
 	main:
 		# Creamos el indice de $t0 
 		la $t0, memory
+		sw $t0 memorystart
 		la $t1, Ref_List
+		sw $t1, refstart
 
 		# Leemos el tamaño de la memoria a reservar
 		li $v0,5
@@ -50,7 +55,7 @@
 		syscall	
 	
 		# Se hace un ciclo donde se rellena con 0 todo el espacio reservado
-		la $t5, counter
+		la $t5, 0
 		li $t6,-1
 
 		# Ciclo para reservar la memoria
@@ -67,7 +72,7 @@
 			# Devolvemos el apuntador al inicio de nuestro arreglo
 			sub $t0,$t0,$t5
 		
-		li $t5,counter #Reinicio del contador
+		li $t5,0 #Reinicio del contador
 
 		# Ciclo para definir el espacio de referencia
 		while2:
@@ -92,7 +97,7 @@
 		beq $t4,0,sendtoperror_malloc1
 
 		la $t1,$s0 # Cargamos la dirección inicial en el registro del arreglo
-		la $t2, counter
+		la $t2, 0
 
 		while5:
 			beq $t2,$s0,while_exit5
@@ -112,13 +117,30 @@
 	
 	
 	free:
+		# Calculamos la dirección de reflist donde está el bloque de memoria solicitado		
+		la $t3,memorystart
+		la $t4, refstart
+		
+		sub $t5, $a0, $t3 #Cantidad de bytes que hay del incio al bloque solicitado
+		add $t1,$t5,$t4 #Sumamos para tener la dirección de la reflist
 
+		lw $t2, $t1
+		beq $t2,-1, sendtoperror_free1 # Si el espacio de memoria esta vacío, no hay anda que borrar
+
+		jal freespacecounter
+
+		sw $t6, blocksize
+
+		# Sabiendo cuanto hay que borrar en cada arreglo de memoria, procedemos a eliminar
+		jal free_memory
+		jal free_reference
 
 	perror:
 		# Hacemos la verificación de errores por cada uno
 		beq $a0, -1, error_Init1
 		beq $a0, -2, error_Init2
 		beq $a0, -3, error_malloc1
+		beq $a0, -4, error_free1
 
 		jr $ra
 	#-----------------------
@@ -151,20 +173,19 @@
 	SendToPerror_init1:
 		# Cargamos el codigo de error en $a1 y lo pasamos a perror
 		li $a1,-1
-		jal perror
-		jr $ra
+		j perror
 
 	SendToPerror_init2:
 		# Cargamos el codigo de error en $a1 y lo pasamos a perror
 		li $a1,-2
-		jal perror
-		jr $ra
+		j perror
+
 	#-----------------------
 	### Subfunciones del malloc
 	#-----------------------
 	malloc_linear_search:
-		la $t5, counter
-		la $t3, counter
+		la $t5, 0
+		la $t3, 0
 		li $t4,0 #Verificador que consiguió espacio. Si al final de la función es cero, no sonsiguió
 
 		while3:
@@ -174,7 +195,6 @@
 			lw	$t2, ref_list($t1)
 			beq $t2,-1, whileverifyspace
 			addi $t2,$t2,1
-
 
 			j while3
 
@@ -195,13 +215,37 @@
 
 				while_exit4:
 					li $t4,1 # Significa que el espacio está disponible
-				jr $ra
+					jr $ra
 		gobackwhile3:
 			j while3
 
 	sendtoperror_malloc1:
 		li $a0,-3
-		jal perror
+		j perror
+
+	#-----------------------
+	### Subfunciones del free
+	#-----------------------
+	sendtoperror_free1:
+		li $a0,-4
+		j perror
+
+	freespacecounter:
+		la $t6,0 # Definimos el contador
+		la $t7, $t1 # Salvar mi dirección inicial
+
+		while6:
+			lw $t5,$t1
+			beq $t5,-1,while_exit6
+			addi $t6,$t6,1
+			addi $t1,$t1,1
+
+			while_exit6:
+				jr $ra
+
+	free_memory:
+		while7:
+			
 	#-----------------------
 	### Funciones de error
 	#-----------------------
@@ -217,5 +261,10 @@
 
 	error_malloc1:
 		la $a0, msgmalloc1
+		jal print_string
+		j newline
+	
+	error_free1:
+		la $a0, msgfree1
 		jal print_string
 		j newline
