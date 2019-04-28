@@ -22,20 +22,28 @@
 
 .text
 	main:
-		# Creamos el indice de $t0 
+		# Creamos el indice de $t0 y un valor de referencia de apuntador para el arreglo de memoria
 		la $t0, memory
 		sw $t0 memorystart
+
+		# Creamos el indice de $t1 y un valor de referencia de apuntador para el arreglo de rreferencia
 		la $t1, Ref_List
 		sw $t1, refstart
 
 		# Leemos el tamaño de la memoria a reservar
 		li $v0,5
 		syscall
+		
 		sw $v0, size
 
 		# Cargamos en $a0 el valor de size para pasarlo a Init y llamamos a la función
 		move $a0, $v0
+		
 		jal init
+
+		# Fin del Main
+		li $v0, 10
+		syscall
 
 	#---------------
 	### Funciones
@@ -54,6 +62,9 @@
 		# Guardamos el espacio de memoria nuevo
 		li $v0,9
 		syscall	
+
+		# Asignamos el nuevo inicio del arreglo a $t0
+		la $t0, ($v0)
 	
 		# Se hace un ciclo donde se rellena con 0 todo el espacio reservado
 		la $t5, 0
@@ -64,7 +75,7 @@
 			beq $t5,$a0,while_exit1 #Condición de salida
 			addi $t5,$t5,1 #Sumamos el contador
 			
-			sw $t6,memory($t0)
+			sw $t6,($t0) 
 			addi $t0,$t0,1
 			
 			j while1
@@ -95,13 +106,15 @@
 		# Verificamos usando la ref_list que hay espacio suficiente
 		la $s1, size # Cargamos en una variable el tamaño de nuestro arreglo
 		jal malloc_linear_search
-		beq $t4,0,sendtoperror_malloc1
+		beq $t4,0,sendtoperror_malloc1 #Si no cosniguió espacio libre, lanza un error
 
 		la $t1,($s0) # Cargamos la dirección inicial en el registro del arreglo
 		la $t2, 0
 
 		while5:
-			beq $t2,$s0,while_exit5
+			# Rellenamos con 1 en la ref_list el bloque solciitado para denotar que ese
+			# espacio de memoria está reservados
+			beq $t1,$s0,while_exit5
 
 			sw $t1,1
 			addi $t1,$t1,1
