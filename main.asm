@@ -8,5 +8,7 @@
 
  .text
 
+
+### LIBRERÍAS DEL PROYECTO ###
  .include "Lista.asm"
  .include "manejador.asm"
