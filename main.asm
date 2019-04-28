@@ -4,10 +4,9 @@
  # Autores:
  #   Luis Pino (15-11138)
  #   Arturo Yepez (15-11551)
- .data
-
  .text
-
+    jal main_manejador
+    jal main
 
 ### LIBRERÍAS DEL PROYECTO ###
  .include "Lista.asm"
