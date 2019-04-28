@@ -15,7 +15,7 @@
 	msginit2: .asciiz "[ERROR: Init02] La cantidad de memoria a reservar es superior al maximo permitido de 1000"
 	msgmalloc1: .asciiz "[ERROR: Malloc01] No se pudo realizar la reserva de memoria"
 	msgfree1: .asciiz "[ERROR: Free01] El espacio de memoria solicitado ya está vacío"
-	
+
 	# Definimos el arreglo donde se manejar� la maemoria
 	Ref_List: .byte 0:1000
 	memory: .byte 1 #Establecemos un word como espacio incial de 4 bytes que luego varíará
@@ -89,10 +89,32 @@
 
 	malloc:
 		# Verificamos usando la ref_list que hay espacio suficiente
+		la $s1, size # Cargamos en una variable el tamaño de nuestro arreglo
 		jal malloc_linear_search
+		beq $t4,0,sendtoperror_malloc1
 
+		la $t1,$s0 # Cargamos la dirección inicial en el registro del arreglo
+		la $t2, counter
+
+		while5:
+			beq $t2,$s0,while_exit5
+
+			sw $t1,1
+			addi $t1,$t1,1
+			j while5
+
+			while_exit5:
+				
+
+		# Cargamos en $s2 la dirección de retorno de la función malloc sumando
+		# el contador del while inicial con la dirección inicial del arreglo
+		addi $s2,$t0,$t3 
+		
+		# Aquí falta el retorno####
 
 	jr $ra
+	
+	
 	free:
 
 
@@ -100,6 +122,7 @@
 		# Hacemos la verificación de errores por cada uno
 		beq $a0, -1, error_Init1
 		beq $a0, -2, error_Init2
+		beq $a0, -3, error_malloc1
 
 		jr $ra
 	#-----------------------
@@ -145,15 +168,44 @@
 	#-----------------------
 	malloc_linear_search:
 		la $t5, counter
+		la $t3, counter
+		li $t4,0 #Verificador que consiguió espacio. Si al final de la función es cero, no sonsiguió
 
 		while3:
-			beq $t5,$a0,while_exit3 #Condición de salida
+			beq $t5,$s1,while_exit3 #Condición de salida
 			addi $t5,$t5,1 #Sumamos el contador
 
 			lw	$t2, ref_list($t1)
-			beq $t2,$
-			
+			beq $t2,-1, whileverifyspace
+			addi $t2,$t2,1
 
+
+			j while3
+
+			while_exit3:
+				jr $ra
+
+		
+		whileverifyspace:
+			la $s0, $t2 #Salvamos la dirección incial del espacio tentativo
+
+			while4:
+				beq $t3,$a0,while_exit4
+				addi $t3,$t3,1 #Sumamos el contador
+
+				lw $t2, ref_list($t1)
+				bne $t2,-1, gobackwhile3
+				j while4
+
+				while_exit4:
+					li $t4,1 # Significa que el espacio está disponible
+				jr $ra
+		gobackwhile3:
+			j while3
+
+	sendtoperror_malloc1:
+		li $a0,-3
+		jal perror
 	#-----------------------
 	### Funciones de error
 	#-----------------------
@@ -164,5 +216,10 @@
 
 	error_init2:
 		la $a0, msginit2
+		jal print_string
+		j newline
+
+	error_malloc1:
+		la $a0, msgmalloc1
 		jal print_string
 		j newline
