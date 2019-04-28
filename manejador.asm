@@ -42,7 +42,8 @@
 	#--------------
 	init:
 		#Verifincamos que la cantidad de bytes sea mayor igual que 1
-		slt  $t2,$a0,1
+		li $t3,1
+		slt  $t2,$a0,$t3
 		beq $t2,0, SendToPerror_init1
 
 		# Verificamos que no sobrepase la cota superior
@@ -96,7 +97,7 @@
 		jal malloc_linear_search
 		beq $t4,0,sendtoperror_malloc1
 
-		la $t1,$s0 # Cargamos la dirección inicial en el registro del arreglo
+		la $t1,($s0) # Cargamos la dirección inicial en el registro del arreglo
 		la $t2, 0
 
 		while5:
@@ -109,9 +110,9 @@
 			while_exit5:
 				# Cargamos en $s2 la dirección de retorno de la función malloc sumando
 				# el contador del while inicial con la dirección inicial del arreglo
-				addi $s2,$t0,$t3 
+				add $s2,$t0,$t3 
 		
-		la $v0,$s2
+		la $v0,($s2)
 
 	jr $ra
 	
@@ -124,7 +125,7 @@
 		sub $t5, $a0, $t3 #Cantidad de bytes que hay del incio al bloque solicitado
 		add $t1,$t5,$t4 #Sumamos para tener la dirección de la reflist
 
-		lw $t2, $t1
+		lw $t2, ($t1)
 		beq $t2,-1, sendtoperror_free1 # Si el espacio de memoria esta vacío, no hay anda que borrar
 
 		jal freespacecounter
@@ -132,15 +133,15 @@
 		sw $t6, blocksize
 
 		# Sabiendo cuanto hay que borrar en cada arreglo de memoria, procedemos a eliminar
-		la $t0,$a0
+		la $t0,($a0)
 		jal free_memory
 
 		jal free_reference
 
 	perror:
 		# Hacemos la verificación de errores por cada uno
-		beq $a0, -1, error_Init1
-		beq $a0, -2, error_Init2
+		beq $a0, -1, error_init1
+		beq $a0, -2, error_init2
 		beq $a0, -3, error_malloc1
 		beq $a0, -4, error_free1
 
@@ -205,7 +206,7 @@
 
 		
 		whileverifyspace:
-			la $s0, $t2 #Salvamos la dirección incial del espacio tentativo
+			la $s0, ($t2) #Salvamos la dirección incial del espacio tentativo
 
 			while4:
 				beq $t3,$a0,while_exit4
@@ -234,10 +235,10 @@
 
 	freespacecounter:
 		la $t6,0 # Definimos el contador
-		la $t7, $t1 # Salvar mi dirección inicial
+		la $t7, ($t1) # Salvar mi dirección inicial
 
 		while6:
-			lw $t5,$t1
+			lw $t5,($t1)
 			beq $t5,-1,while_exit6
 			addi $t6,$t6,1
 			addi $t1,$t1,1
