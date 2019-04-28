@@ -195,7 +195,7 @@
 			beq $t5,$s1,while_exit3 #Condición de salida
 			addi $t5,$t5,1 #Sumamos el contador
 
-			lw	$t2, ref_list($t1)
+			lw	$t2, ($t1)
 			beq $t2,-1, whileverifyspace
 			addi $t2,$t2,1
 
@@ -212,7 +212,7 @@
 				beq $t3,$a0,while_exit4
 				addi $t3,$t3,1 #Sumamos el contador
 
-				lw $t2, ref_list($t1)
+				lw $t2, ($t1)
 				bne $t2,-1, gobackwhile3
 				j while4
 
