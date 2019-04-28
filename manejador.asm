@@ -132,7 +132,9 @@
 		sw $t6, blocksize
 
 		# Sabiendo cuanto hay que borrar en cada arreglo de memoria, procedemos a eliminar
+		la $t0,$a0
 		jal free_memory
+
 		jal free_reference
 
 	perror:
@@ -241,11 +243,40 @@
 			addi $t1,$t1,1
 
 			while_exit6:
+				sub,$t1,$t1,$t6 #restauramos el indice original del arreglo
 				jr $ra
 
 	free_memory:
+		lw $t2, blocksize
+		li $t5,-1
 		while7:
-			
+			beq $t2,0,while_exit7
+			subi $t2,$t2,1
+
+			sw $t5,($t0)
+			addi $t0,$t0,1
+			j while7
+
+			while_exit7:
+				lw $t2, blocksize
+				sub $t0,$t0,$t2
+				jr $ra
+	
+	free_reference:
+		lw $t2, blocksize
+		li $t5,-1
+		while8:
+			beq $t2,0,while_exit8
+			subi $t2,$t2,1
+
+			sw $t5,($t1)
+			addi $t1,$t1,1
+			j while8
+
+			while_exit8:
+				lw $t2, blocksize
+				sub $t1,$t1,$t2
+				jr $ra
 	#-----------------------
 	### Funciones de error
 	#-----------------------
