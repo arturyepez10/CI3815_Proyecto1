@@ -5,9 +5,12 @@
  #   Luis Pino (15-11138)
  #   Arturo Yepez (15-11551)
  .text
-    jal main_manejador
-    jal main
-
-### LIBRER√çAS DEL PROYECTO ###
- .include "Lista.asm"
+   li $a0, 16
+   jal malloc
+      
+   li $v0,10
+   syscall
+### LIBRER√?AS DEL PROYECTO ###
  .include "manejador.asm"
+ .include "Lista.asm"
+

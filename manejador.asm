@@ -6,9 +6,9 @@
 	blocksize: .word 
 	memorystart: .word
 	refstart: .word
-
+	test: .byte 
 	# Auxiliares
-	salto_de_linea: .asciiz "\n"
+	
 	
 	# Mensajes de error
 	msginit1: .asciiz "[ERROR: Init01] La cantidad de memoria a reservar no puede ser menor a 1"
@@ -41,10 +41,7 @@
 		
 		jal init
 
-		# Fin del Main
-		li $v0, 10
-		syscall
-
+		jr $ra
 	#---------------
 	### Funciones
 	#--------------
@@ -159,28 +156,6 @@
 		beq $a0, -4, error_free1
 
 		jr $ra
-	#-----------------------
-	### Funciones auxiliares
-	#-----------------------
-
-	# Imprimir String
-	print_string:
-		li $v0, 4
-		syscall
-		jr $ra
-
-	# Imprimir Entero
-	print_integer:
-		li $v0, 1
-		syscall
-		jr $ra
-
-	# Salto de linea
-	newline:
-		li $v0, 4
-		la $a0, salto_de_linea
-		syscall
-		jr $ra
 
 	#-----------------------
 	### Subfunciones del Init
@@ -207,8 +182,9 @@
 		while3:
 			beq $t5,$s1,while_exit3 #Condición de salida
 			addi $t5,$t5,1 #Sumamos el contador
-
-			lw	$t2, ($t1)
+			
+			sb $t1,test
+			lb $t2,test
 			beq $t2,-1, whileverifyspace
 			addi $t2,$t2,1
 
@@ -225,7 +201,8 @@
 				beq $t3,$a0,while_exit4
 				addi $t3,$t3,1 #Sumamos el contador
 
-				lw $t2, ($t1)
+				sb $t1,test
+				lb $t2,test
 				bne $t2,-1, gobackwhile3
 				j while4
 
