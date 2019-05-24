@@ -1,7 +1,7 @@
 ### TAD_Manejador: Manejador de memoria 
 .data	
 	# Variables base
-	InitMax: .word 200
+	InitMax: .word 500
 	size: .word # Cantidad de memoria que solicita el usuario
 	blocksize: .word 
 	memorystart: .word
@@ -19,7 +19,7 @@
 	msggenerico: .asciiz "[ERROR] El manejador no ha sido inicializado"
 
 	# Definimos el arreglo donde se manejar� la maemoria
-	Ref_List: .byte 0:1000
+	Ref_List: .byte 0:500
 	memory: .byte 1 #Establecemos un word como espacio incial de 4 bytes que luego varíará
 
 .text
