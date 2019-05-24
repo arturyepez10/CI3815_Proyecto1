@@ -6,7 +6,8 @@
 	blocksize: .word 
 	memorystart: .word
 	refstart: .word
-	test: .byte 
+	test: .byte
+	started_manager: .word 1 
 	# Auxiliares
 	
 	
@@ -15,6 +16,7 @@
 	msginit2: .asciiz "[ERROR: Init02] La cantidad de memoria a reservar es superior al maximo permitido de 1000"
 	msgmalloc1: .asciiz "[ERROR: Malloc01] No se pudo realizar la reserva de memoria"
 	msgfree1: .asciiz "[ERROR: Free01] El espacio de memoria solicitado ya está vacío"
+	msggenerico: .asciiz "[ERROR] El manejador no ha sido inicializado"
 
 	# Definimos el arreglo donde se manejar� la maemoria
 	Ref_List: .byte 0:1000
@@ -96,10 +98,17 @@
 		while_exit2: 
 			# Devolvemos el apuntador al inicio de nuestro arreglo
 			sub $t1,$t1,$t5
-
+		
+		li $t6,2
+		sw $t6, started_manager
 	jr $ra
 
 	malloc:
+		li $t5, 1
+		lw $t6, started_manager
+
+		beq $t5,$t6,sendtoperror_malloc2
+		
 		# Verificamos usando la ref_list que hay espacio suficiente
 		la $s1, size # Cargamos en una variable el tamaño de nuestro arreglo
 		jal malloc_linear_search
@@ -128,6 +137,11 @@
 	
 	
 	free:
+		li $t5, 1
+		lw $t6, started_manager
+
+		beq $t5,$t6,sendtoperror_malloc2
+
 		# Calculamos la dirección de reflist donde está el bloque de memoria solicitado		
 		la $t3,memorystart
 		la $t4, refstart
@@ -154,6 +168,7 @@
 		beq $a0, -2, error_init2
 		beq $a0, -3, error_malloc1
 		beq $a0, -4, error_free1
+		beq $a0, -5, error_generico
 
 		jr $ra
 
@@ -214,6 +229,10 @@
 
 	sendtoperror_malloc1:
 		li $a0,-3
+		j perror
+
+	sendtoperror_malloc2:
+		li $a0,-5
 		j perror
 
 	#-----------------------
@@ -288,5 +307,10 @@
 	
 	error_free1:
 		la $a0, msgfree1
+		jal print_string
+		j newline
+
+	error_generico:
+		la $a0, msggenerico
 		jal print_string
 		j newline

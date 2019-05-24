@@ -161,6 +161,8 @@ newline:
 	
 # 1er NODO DE LISTA
 Cabeza_Lista:
+		li $t5, 1
+		lw $t6, started_manager
 	#Se reserva el espacio para:
 	#Dirección Primer Nodo, Dirección Ultimo Nodo, Cantidad de Nodos en la lista
 	addi $a0, $zero, 12
@@ -264,6 +266,7 @@ Nodo:
 # IMPRIMIR NODO DE LA LISTA	
 print_Nodo:  #Se utiliza $a0, $a1, $t1 para pasar como parametro la dirección donde está el nodo
 	#Se salvan los registros a utilizar
+	
 	sw $ra, -8($sp)
 	#----------
 	
@@ -307,6 +310,9 @@ print_list:
 	#Se salvan los registros a utilizar
 	sw $ra, -4($sp)
 	#----------
+
+	li $t5, 1
+	lw $t6, started_manager
 	
 	#Se accede al Head para buscar el valor de la dirección donde está alojado el primer nodo
 	lw $a1, Head
