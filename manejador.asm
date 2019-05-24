@@ -19,14 +19,14 @@
 	msggenerico: .asciiz "[ERROR] El manejador no ha sido inicializado"
 
 	# Definimos el arreglo donde se manejar� la maemoria
-	Ref_List: .byte 0:500
+	Ref_List: .byte 1
 	memory: .byte 1 #Establecemos un word como espacio incial de 4 bytes que luego varíará
 
 .text
 	main_manejador:
 		# Creamos el indice de $t0 y un valor de referencia de apuntador para el arreglo de memoria
 		la $t0, memory
-		sw $t0 memorystart
+		sw $t0 ,memorystart
 
 		# Creamos el indice de $t1 y un valor de referencia de apuntador para el arreglo de rreferencia
 		la $t1, Ref_List
@@ -54,11 +54,13 @@
 		
 		beq $t2,1, SendToPerror_init1
 
-
+		
 		# Verificamos que no sobrepase la cota superior
 		lw $t4,InitMax
 		sgt $t2,$a0,$t4
 		beq $t2,1, SendToPerror_init2
+		
+		add $a0,$a0,$a0
 
 		# Guardamos el espacio de memoria nuevo
 		li $v0,9
