@@ -104,10 +104,9 @@
 	jr $ra
 
 	malloc:
-		li $t5, 1
 		lw $t6, started_manager
 
-		beq $t5,$t6,sendtoperror_malloc2
+		beq $t6,1,sendtoperror_malloc2
 		
 		# Verificamos usando la ref_list que hay espacio suficiente
 		la $s1, size # Cargamos en una variable el tamaño de nuestro arreglo
@@ -293,24 +292,30 @@
 	error_init1:
 		la $a0, msginit1
 		jal print_string
-		j newline
+		j newline_error
 
 	error_init2:
 		la $a0, msginit2
 		jal print_string
-		j newline
+		j newline_error
 
 	error_malloc1:
 		la $a0, msgmalloc1
 		jal print_string
-		j newline
+		j newline_error
 	
 	error_free1:
 		la $a0, msgfree1
 		jal print_string
-		j newline
+		j newline_error
 
 	error_generico:
 		la $a0, msggenerico
 		jal print_string
-		j newline
+		j newline_error
+
+	newline_error:
+		li $v0, 4
+		la $a0, salto_de_linea
+		syscall
+		jr $ra

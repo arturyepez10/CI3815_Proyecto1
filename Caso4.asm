@@ -5,12 +5,18 @@
  #   Luis Pino (15-11138)
  #   Arturo Yepez (15-11551)
  .text
-   li $a0, 16
+   li $a0, 20
+   jal init
+   
+   li $a0, 12
    jal malloc
-      
+
+   li $a0, 4
+   jal malloc
+
    li $v0,10
    syscall
-### LIBRERÃ?AS DEL PROYECTO ###
+   
+### LIBRERï¿½?AS DEL PROYECTO ###
  .include "manejador.asm"
  .include "Lista.asm"
-
