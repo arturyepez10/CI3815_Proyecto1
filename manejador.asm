@@ -51,7 +51,9 @@
 		#Verifincamos que la cantidad de bytes sea mayor igual que 1
 		li $t3,1
 		slt  $t2,$a0,$t3
-		beq $t2,0, SendToPerror_init1
+		
+		beq $t2,1, SendToPerror_init1
+
 
 		# Verificamos que no sobrepase la cota superior
 		lw $t4,InitMax
@@ -74,7 +76,7 @@
 			beq $t5,$a0,while_exit1 #Condición de salida
 			addi $t5,$t5,1 #Sumamos el contador
 			
-			sw $t6,($t0) 
+			sb $t6,($t0) 
 			addi $t0,$t0,1
 			
 			j while1
@@ -90,10 +92,10 @@
 			beq $t5,$a0,while_exit2 #Condición de salida
 			addi $t5,$t5,1 #Sumamos el contador
 			
-			sw $t6,Ref_List($t1)
+			sb $t6,Ref_List($t1)
 			addi $t1,$t1,1
 			
-			j while1
+			j while2
 
 		while_exit2: 
 			# Devolvemos el apuntador al inicio de nuestro arreglo
@@ -110,8 +112,16 @@
 		
 		# Verificamos usando la ref_list que hay espacio suficiente
 		la $s1, size # Cargamos en una variable el tamaño de nuestro arreglo
+		
+		#se salvan registros a utilizar
+		sw $ra, -4($sp)
+		
 		jal malloc_linear_search
-		beq $t4,0,sendtoperror_malloc1 #Si no cosniguió espacio libre, lanza un error
+		
+		#se salvan registros a utilizar
+		lw $ra, -4($sp)
+		
+		beq $t4,$zero,sendtoperror_malloc1 #Si no cosniguió espacio libre, lanza un error
 
 		la $t1,($s0) # Cargamos la dirección inicial en el registro del arreglo
 		la $t2, 0
@@ -121,7 +131,7 @@
 			# espacio de memoria está reservados
 			beq $t1,$s0,while_exit5
 
-			sw $t1,1
+			sb $t1,1
 			addi $t1,$t1,1
 			j while5
 
@@ -151,15 +161,34 @@
 		lw $t2, ($t1)
 		beq $t2,-1, sendtoperror_free1 # Si el espacio de memoria esta vacío, no hay anda que borrar
 
+		#se salvan registros a utilizar
+		sw $ra, -4($sp)
+		
 		jal freespacecounter
+		
+		#se salvan registros a utilizar
+		lw $ra, -4($sp)
 
 		sw $t6, blocksize
 
 		# Sabiendo cuanto hay que borrar en cada arreglo de memoria, procedemos a eliminar
 		la $t0,($a0)
+		
+		#se salvan registros a utilizar
+		sw $ra, -4($sp)
+		
 		jal free_memory
+		
+		#se salvan registros a utilizar
+		lw $ra, -4($sp)
+		
+		#se salvan registros a utilizar
+		sw $ra, -4($sp)
 
 		jal free_reference
+		
+		#se salvan registros a utilizar
+		lw $ra, -4($sp)
 
 	perror:
 		# Hacemos la verificación de errores por cada uno
@@ -199,7 +228,7 @@
 			
 			sb $t1,test
 			lb $t2,test
-			beq $t2,-1, whileverifyspace
+			bne $t2,1, whileverifyspace
 			addi $t2,$t2,1
 
 			j while3
@@ -278,7 +307,7 @@
 			beq $t2,0,while_exit8
 			subi $t2,$t2,1
 
-			sw $t5,($t1)
+			sb $t5,($t1)
 			addi $t1,$t1,1
 			j while8
 
@@ -286,36 +315,56 @@
 				lw $t2, blocksize
 				sub $t1,$t1,$t2
 				jr $ra
+				
 	#-----------------------
 	### Funciones de error
 	#-----------------------
 	error_init1:
+	#se salvan registros a utilizar
+	sw $ra, -4($sp)
+	#----------
 		la $a0, msginit1
 		jal print_string
-		j newline_error
+		jal newline
+	#----------
+	#se salvan registros a utilizar
+	sw $ra, -4($sp)
+	
+	
 
 	error_init2:
+	#se salvan registros a utilizar
+	sw $ra, -4($sp)
+	#----------
 		la $a0, msginit2
 		jal print_string
-		j newline_error
+		jal newline
+	#se salvan registros a utilizar
+	sw $ra, -4($sp)
 
 	error_malloc1:
+	#se salvan registros a utilizar
+	sw $ra, -4($sp)
 		la $a0, msgmalloc1
 		jal print_string
-		j newline_error
+		jal newline
+	#se salvan registros a utilizar
+	sw $ra, -4($sp)
 	
 	error_free1:
+	#se salvan registros a utilizar
+	sw $ra, -4($sp)
 		la $a0, msgfree1
 		jal print_string
-		j newline_error
+		jal newline
+	#se salvan registros a utilizar
+	sw $ra, -4($sp)
 
 	error_generico:
+	#se salvan registros a utilizar
+	sw $ra, -4($sp)
 		la $a0, msggenerico
 		jal print_string
-		j newline_error
-
-	newline_error:
-		li $v0, 4
-		la $a0, salto_de_linea
-		syscall
-		jr $ra
+		jal newline
+	#se salvan registros a utilizar
+	sw $ra, -4($sp)
